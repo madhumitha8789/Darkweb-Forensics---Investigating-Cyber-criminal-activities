@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Batch Processing - Dark Web Analyzer</title>
+    <style>
+        :root {
+            --tor-purple: #7d4698;
+            --tor-dark: #1a1a1a;
+            --tor-darker: #121212;
+            --tor-medium: #2a2a2a;
+            --tor-light: #3a3a3a;
+            --tor-text: #e0e0e0;
+            --tor-accent: #9966cc;
+            --tor-highlight: #56347c;
+            --high-risk: #ff4d4d;
+            --medium-risk: #ffa64d;
+            --low-risk: #6bc25d;
+        }
+        
+        body { 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            background-color: var(--tor-darker); 
+            color: var(--tor-text);
+        }
+        
+        .navbar {
+            background-color: var(--tor-dark);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        }
+        
+        .logo {
+            font-size: 22px;
+            font-weight: bold;
+            color: var(--tor-accent);
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .nav-links a {
+            color: var(--tor-text);
+            text-decoration: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        
+        .nav-links a:hover {
+            background-color: var(--tor-medium);
+        }
+        
+        .nav-links a.active {
+            background-color: var(--tor-purple);
+            color: white;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .page-title {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .batch-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .batch-card {
+            background-color: var(--tor-dark);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            border: 1px solid var(--tor-light);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .batch-header {
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--tor-light);
+            padding-bottom: 10px;
+        }
+        
+        .batch-id {
+            font-size: 14px;
+            color: #aaa;
+            margin-bottom: 5px;
+        }
+        
+        .batch-date {
+            font-size: 14px;
+            color: var(--tor-accent);
+        }
+        
+        .batch-progress {
+            margin: 15px 0;
+            height: 10px;
+            background-color: var(--tor-medium);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .batch-progress-bar {
+            height: 100%;
+            background-color: var(--tor-accent);
+            border-radius: 5px;
+        }
+        
+        .batch-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        
+        .batch-stat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .batch-stat-value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .batch-stat-label {
+            font-size: 12px;
+            color: #aaa;
+            text-transform: uppercase;
+        }
+        
+        .batch-footer {
+            margin-top: auto;
+            display: flex;
+            justify-content: space-between;
+            padding-top: 15px;
+            border-top: 1px solid var(--tor-light);
+        }
+        
+        .btn {
+            background-color: var(--tor-medium);
+            color: var(--tor-text);
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+            display: inline-block;
+        }
+        
+        .btn:hover {
+            background-color: var(--tor-light);
+        }
+        
+        .btn-primary {
+            background-color: var(--tor-accent);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--tor-highlight);
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .status-pending {
+            background-color: var(--tor-accent);
+        }
+        
+        .status-processing {
+            background-color: var(--medium-risk);
+        }
+        
+        .status-completed {
+            background-color: var(--low-risk);
+        }
+        
+        .status-failed {
+            background-color: var(--high-risk);
+        }
+        
+        .new-batch {
+            background-color: var(--tor-dark);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            margin-bottom: 30px;
+            border: 1px solid var(--tor-light);
+        }
+        
+        .new-batch-header {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: var(--tor-accent);
+        }
+        
+        .new-batch-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .new-batch-form textarea {
+            padding: 12px;
+            background-color: var(--tor-medium);
+            color: var(--tor-text);
+            border: 1px solid var(--tor-light);
+            border-radius: 4px;
+            height: 150px;
+            resize: vertical;
+            font-family: inherit;
+        }
+        
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            background-color: var(--tor-dark);
+            border-radius: 8px;
+            margin-top: 40px;
+            color: #888;
+        }
+        
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        /* Dynamic cybersecurity background with cursor effects */
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+
+        .cursor-follower {
+            position: fixed;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(153, 102, 204, 0.3) 0%, rgba(153, 102, 204, 0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            z-index: -1;
+            animation: pulse-cursor 2s infinite;
+            mix-blend-mode: screen;
+        }
+
+        .data-lines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            overflow: hidden;
+        }
+
+        .data-line {
+            position: absolute;
+            height: 1px;
+            width: 100%;
+            background-image: linear-gradient(to right, 
+                transparent, 
+                rgba(153, 102, 204, 0.1), 
+                rgba(153, 102, 204, 0.2), 
+                rgba(153, 102, 204, 0.1), 
+                transparent);
+            animation-name: data-line-animation;
+            animation-timing-function: linear;
+            animation-iteration-count: infinite;
+            box-shadow: 0 0 5px rgba(153, 102, 204, 0.5);
+        }
+
+        @keyframes data-line-animation {
+            0% { transform: translateY(-200%); }
+            100% { transform: translateY(200vh); }
+        }
+
+        .digital-rain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -3;
+            color: rgba(153, 102, 204, 0.1);
+            font-family: monospace;
+            font-size: 14px;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .digital-rain .rain-column {
+            position: absolute;
+            top: -20%;
+            animation-name: digital-rain-animation;
+            animation-timing-function: linear;
+            animation-iteration-count: infinite;
+            text-align: center;
+        }
+
+        @keyframes digital-rain-animation {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(200vh); }
+        }
+
+        @keyframes pulse-cursor {
+            0% { opacity: 0.2; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 0.4; transform: translate(-50%, -50%) scale(1.5); }
+            100% { opacity: 0.2; transform: translate(-50%, -50%) scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Dynamic background elements -->
+    <div id="particles-js"></div>
+    <div class="cursor-follower"></div>
+    <div class="data-lines"></div>
+    <div class="digital-rain"></div>
+
+    <div class="navbar">
+        <div class="logo">🧅 DARK WEB ANALYZER</div>
+        <div class="nav-links">
+            <a href="/"><i class="fas fa-home"></i> Home</a>
+            <a href="/dashboard"><i class="fas fa-chart-line"></i> Dashboard</a>
+            <a href="/history"><i class="fas fa-history"></i> History</a>
+            <a href="/batch" class="active"><i class="fas fa-tasks"></i> Batch</a>
+            <a href="/vulnerability"><i class="fas fa-shield-alt"></i> Vulnerability</a>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="page-header">
+            <div class="page-title">Batch Processing</div>
+        </div>
+        
+        <div class="new-batch">
+            <div class="new-batch-header">New Batch Analysis</div>
+            <form class="new-batch-form" method="POST" action="/">
+                <textarea name="batch_urls" placeholder="Enter one .onion URL per line (e.g., http://example.onion)"></textarea>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Start Batch Analysis</button>
+                </div>
+            </form>
+        </div>
+        
+        {% if not batch_jobs or batch_jobs|length == 0 %}
+            <div class="no-data">
+                <h2>No Batch Jobs</h2>
+                <p>You haven't created any batch analysis jobs yet.</p>
+            </div>
+        {% else %}
+            <div class="batch-grid">
+                {% for batch in batch_jobs %}
+                    <div class="batch-card">
+                        <div class="batch-header">
+                            <div class="batch-id">ID: {{ batch.id[:8] }}...</div>
+                            <div class="batch-date">{{ batch.created }}</div>
+                            
+                            {% if batch.status == "pending" %}
+                                <span class="status-badge status-pending">Pending</span>
+                            {% elif batch.status == "processing" %}
+                                <span class="status-badge status-processing">Processing</span>
+                            {% elif batch.status == "completed" %}
+                                <span class="status-badge status-completed">Completed</span>
+                            {% else %}
+                                <span class="status-badge status-failed">Failed</span>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="batch-progress">
+                            <div class="batch-progress-bar" 
+                                 data-processed="{{ batch.processed_urls }}" 
+                                 data-total="{{ batch.total_urls }}"
+                                 style="width: 0%"></div>
+                        </div>
+                        
+                        <div class="batch-stats">
+                            <div class="batch-stat">
+                                <div class="batch-stat-value">{{ batch.total_urls }}</div>
+                                <div class="batch-stat-label">Total URLs</div>
+                            </div>
+                            
+                            <div class="batch-stat">
+                                <div class="batch-stat-value">{{ batch.processed_urls }}</div>
+                                <div class="batch-stat-label">Processed</div>
+                            </div>
+                            
+                            <div class="batch-stat">
+                                <div class="batch-stat-value percentage-display" 
+                                     data-processed="{{ batch.processed_urls }}" 
+                                     data-total="{{ batch.total_urls }}">0%</div>
+                                <div class="batch-stat-label">Complete</div>
+                            </div>
+                        </div>
+                        
+                        <div class="batch-footer">
+                            <a href="/batch/{{ batch.id }}" class="btn btn-primary">View Details</a>
+                            
+                            {% if batch.status != "completed" %}
+                                <form method="POST" action="/batch/{{ batch.id }}">
+                                    <button type="submit" class="btn">Process Next</button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+
+<script>
+    // Calculate and set progress bar widths and percentages
+    document.addEventListener('DOMContentLoaded', function() {
+        // Update progress bars
+        var progressBars = document.querySelectorAll('.batch-progress-bar');
+        progressBars.forEach(function(bar) {
+            var processed = parseInt(bar.getAttribute('data-processed'));
+            var total = parseInt(bar.getAttribute('data-total'));
+            var percentage = total > 0 ? Math.floor((processed / total) * 100) : 0;
+            bar.style.width = percentage + '%';
+        });
+        
+        // Update percentage displays
+        var percentageDisplays = document.querySelectorAll('.percentage-display');
+        percentageDisplays.forEach(function(display) {
+            var processed = parseInt(display.getAttribute('data-processed'));
+            var total = parseInt(display.getAttribute('data-total'));
+            var percentage = total > 0 ? Math.floor((processed / total) * 100) : 0;
+            display.textContent = percentage + '%';
+        });
+
+        // Initialize dynamic background
+        initDynamicBackground();
+    });
+
+    // Initialize dynamic background effects
+    function initDynamicBackground() {
+        // Load particles.js script if not already loaded
+        if (typeof particlesJS === 'undefined') {
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js';
+            script.onload = setupParticles;
+            document.head.appendChild(script);
+        } else {
+            setupParticles();
+        }
+        
+        // Initialize cursor follower
+        const cursorFollower = document.querySelector('.cursor-follower');
+        document.addEventListener('mousemove', (e) => {
+            cursorFollower.style.left = e.clientX + 'px';
+            cursorFollower.style.top = e.clientY + 'px';
+        });
+        
+        // Create data lines
+        const dataLines = document.querySelector('.data-lines');
+        for (let i = 0; i < 15; i++) {
+            const line = document.createElement('div');
+            line.classList.add('data-line');
+            line.style.top = Math.random() * 100 + 'vh';
+            line.style.animationDuration = (Math.random() * 8 + 5) + 's';
+            line.style.opacity = Math.random() * 0.5 + 0.1;
+            dataLines.appendChild(line);
+        }
+        
+        // Create digital rain
+        const digitalRain = document.querySelector('.digital-rain');
+        const characters = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
+        
+        for (let i = 0; i < 30; i++) {
+            const column = document.createElement('div');
+            column.classList.add('rain-column');
+            column.style.left = (Math.random() * 100) + 'vw';
+            column.style.animationDuration = (Math.random() * 10 + 10) + 's';
+            column.style.opacity = Math.random() * 0.3 + 0.1;
+            
+            const columnLength = Math.floor(Math.random() * 20 + 10);
+            let columnHtml = '';
+            
+            for (let j = 0; j < columnLength; j++) {
+                const charIndex = Math.floor(Math.random() * characters.length);
+                columnHtml += characters.charAt(charIndex) + '<br>';
+            }
+            
+            column.innerHTML = columnHtml;
+            digitalRain.appendChild(column);
+        }
+    }
+    
+    function setupParticles() {
+        particlesJS('particles-js', {
+            "particles": {
+                "number": {
+                    "value": 40,
+                    "density": {
+                        "enable": true,
+                        "value_area": 800
+                    }
+                },
+                "color": {
+                    "value": "#9966cc"
+                },
+                "shape": {
+                    "type": "circle",
+                    "stroke": {
+                        "width": 0,
+                        "color": "#000000"
+                    }
+                },
+                "opacity": {
+                    "value": 0.2,
+                    "random": true,
+                    "anim": {
+                        "enable": true,
+                        "speed": 1,
+                        "opacity_min": 0.1,
+                        "sync": false
+                    }
+                },
+                "size": {
+                    "value": 3,
+                    "random": true,
+                    "anim": {
+                        "enable": true,
+                        "speed": 2,
+                        "size_min": 0.1,
+                        "sync": false
+                    }
+                },
+                "line_linked": {
+                    "enable": true,
+                    "distance": 150,
+                    "color": "#7d4698",
+                    "opacity": 0.2,
+                    "width": 1
+                },
+                "move": {
+                    "enable": true,
+                    "speed": 1,
+                    "direction": "none",
+                    "random": true,
+                    "straight": false,
+                    "out_mode": "out",
+                    "bounce": false,
+                    "attract": {
+                        "enable": true,
+                        "rotateX": 600,
+                        "rotateY": 1200
+                    }
+                }
+            },
+            "interactivity": {
+                "detect_on": "canvas",
+                "events": {
+                    "onhover": {
+                        "enable": true,
+                        "mode": "grab"
+                    },
+                    "onclick": {
+                        "enable": true,
+                        "mode": "push"
+                    },
+                    "resize": true
+                },
+                "modes": {
+                    "grab": {
+                        "distance": 140,
+                        "line_linked": {
+                            "opacity": 0.5
+                        }
+                    },
+                    "push": {
+                        "particles_nb": 3
+                    }
+                }
+            },
+            "retina_detect": true
+        });
+    }
+</script>
+</body>
+</html> 

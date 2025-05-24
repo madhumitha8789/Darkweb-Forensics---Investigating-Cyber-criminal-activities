@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dark Web Crawler Interface</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <style>
+        :root {
+            --tor-purple: #7d4698;
+            --tor-dark: #1a1a1a;
+            --tor-darker: #121212;
+            --tor-medium: #2a2a2a;
+            --tor-light: #3a3a3a;
+            --tor-text: #e0e0e0;
+            --tor-accent: #9966cc;
+            --tor-highlight: #56347c;
+            --high-risk: #ff2a6d;
+            --medium-risk: #ffd000;
+            --low-risk: #00ff66;
+            --card-shadow: 0 8px 16px rgba(0,0,0,0.3);
+            --card-border: 1px solid rgba(255,255,255,0.05);
+            --card-radius: 12px;
+            --transition-speed: 0.3s;
+        }
+        
+        [data-theme="light"] {
+            --tor-purple: #9356b8;
+            --tor-dark: #f5f5f5;
+            --tor-darker: #eeeeee;
+            --tor-medium: #dddddd;
+            --tor-light: #cccccc;
+            --tor-text: #333333;
+            --tor-accent: #7d4698;
+            --tor-highlight: #9966cc;
+            --card-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            --card-border: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        * {
+            box-sizing: border-box;
+            transition: background-color var(--transition-speed), color var(--transition-speed);
+        }
+        
+        body { 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            background-color: var(--tor-darker); 
+            color: var(--tor-text);
+        }
+        
+        .navbar {
+            background-color: var(--tor-dark);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .logo-nav {
+            font-size: 22px;
+            font-weight: bold;
+            color: var(--tor-accent);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo-nav i {
+            font-size: 24px;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .nav-links a {
+            color: var(--tor-text);
+            text-decoration: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .nav-links a:hover {
+            background-color: var(--tor-medium);
+            transform: translateY(-2px);
+        }
+        
+        .nav-links a.active {
+            background-color: var(--tor-purple);
+            color: white;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: var(--tor-text);
+            cursor: pointer;
+            font-size: 18px;
+            padding: 8px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        
+        .theme-toggle:hover {
+            background-color: var(--tor-medium);
+            transform: rotate(30deg);
+        }
+        
+        h1, h2, h3 { 
+            color: var(--tor-text); 
+            text-align: center; 
+            margin-bottom: 30px;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+        }
+        
+        .container { 
+            max-width: 1200px; 
+            margin: 30px auto; 
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .search-card {
+            background-color: var(--tor-dark); 
+            padding: 30px; 
+            border-radius: var(--card-radius); 
+            box-shadow: var(--card-shadow);
+            border: var(--card-border);
+            margin-bottom: 30px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .search-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px rgba(0,0,0,0.4);
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .logo-inner {
+            font-size: 28px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            color: var(--tor-accent);
+            display: inline-flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px 25px;
+            border-radius: 50px;
+            background-color: rgba(0,0,0,0.2);
+            border: 2px solid var(--tor-accent);
+            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+            box-shadow: 0 5px 15px rgba(125, 70, 152, 0.3);
+        }
+        
+        .logo-inner i {
+            font-size: 32px;
+        }
+        
+        form { 
+            display: flex; 
+            gap: 10px; 
+            margin-bottom: 30px; 
+            align-items: center; 
+        }
+        
+        form input[type="text"] { 
+            flex-grow: 1; 
+            padding: 16px; 
+            border: 1px solid var(--tor-light); 
+            border-radius: 8px; 
+            font-size: 16px; 
+            background-color: var(--tor-medium);
+            color: var(--tor-text);
+            transition: all 0.3s;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        form input[type="text"]:focus {
+            border-color: var(--tor-accent);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(153, 102, 204, 0.3);
+        }
+        
+        form input[type="submit"] { 
+            padding: 16px 30px; 
+            background-color: var(--tor-purple); 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+        
+        form input[type="submit"]:hover { 
+            background-color: var(--tor-accent);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        table { 
+            width: 100%; 
+            margin-top: 20px; 
+            border-collapse: separate;
+            border-spacing: 0;
+            border-radius: var(--card-radius);
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+        }
+        
+        th, td { 
+            padding: 15px; 
+            text-align: left; 
+            word-break: break-word;
+        }
+        
+        th { 
+            background-color: var(--tor-purple); 
+            color: white;
+            font-weight: 500;
+            position: sticky;
+            top: 70px;
+            z-index: 10;
+        }
+        
+        tr:nth-child(even) { background-color: var(--tor-medium); }
+        tr:hover { 
+            background-color: var(--tor-light); 
+            transform: scale(1.01);
+            transition: all 0.2s;
+        }
+        
+        td {
+            border-bottom: 1px solid var(--tor-light);
+        }
+        
+        tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .error { 
+            color: var(--high-risk); 
+            background-color: rgba(255, 77, 77, 0.1); 
+            border-left: 5px solid var(--high-risk); 
+            padding: 20px; 
+            margin-bottom: 20px; 
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            animation: shake 0.5s ease-in-out;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        
+        .error i {
+            font-size: 24px;
+            color: var(--high-risk);
+        }
+        
+        .no-data { 
+            margin-top: 20px; 
+            text-align: center; 
+            color: var(--tor-text); 
+            background-color: var(--tor-medium); 
+            padding: 30px; 
+            border: var(--card-border);
+            border-radius: var(--card-radius);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .no-data i {
+            font-size: 32px;
+            color: var(--tor-accent);
+            opacity: 0.7;
+        }
+        
+        .results-card {
+            background-color: var(--tor-dark); 
+            border-radius: var(--card-radius); 
+            padding: 30px; 
+            box-shadow: var(--card-shadow);
+            border: var(--card-border);
+            margin-top: 30px;
+            animation: slideUp 0.5s ease-in-out;
+        }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .results-header { 
+            font-size: 1.5em; 
+            color: var(--tor-text); 
+            margin-top: 0;
+            margin-bottom: 20px; 
+            text-align: left;
+            border-bottom: 1px solid var(--tor-light);
+            padding-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .results-header i {
+            color: var(--tor-accent);
+        }
+        
+        .ip-info { 
+            background-color: var(--tor-medium); 
+            border-left: 4px solid var(--tor-purple); 
+            margin-bottom: 20px; 
+            padding: 20px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .ip-info i {
+            font-size: 24px;
+            color: var(--tor-accent);
+        }
+        
+        .ip-info p { margin: 5px 0; }
+        .ip-info strong { color: var(--tor-accent); }
+        
+        .ai-analysis { 
+            background-color: var(--tor-medium); 
+            padding: 20px; 
+            border-radius: 8px; 
+            white-space: pre-line; 
+            font-family: 'Consolas', monospace;
+            line-height: 1.6;
+            overflow: auto;
+            max-height: 400px;
+            margin-top: 20px;
+            position: relative;
+            border: 1px solid var(--tor-light);
+        }
+        
+        .ai-analysis::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        .ai-analysis::-webkit-scrollbar-track {
+            background: var(--tor-dark);
+            border-radius: 10px;
+        }
+        
+        .ai-analysis::-webkit-scrollbar-thumb {
+            background: var(--tor-accent);
+            border-radius: 10px;
+        }
+        
+        .ai-analysis-header { 
+            font-weight: bold; 
+            color: var(--tor-accent); 
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        #ai-assessment { 
+            margin-top: 30px; 
+            background-color: var(--tor-dark); 
+            padding: 25px; 
+            border-radius: var(--card-radius);
+            border-left: 5px solid var(--tor-purple);
+            margin-bottom: 30px;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s;
+        }
+        
+        #ai-assessment:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px rgba(0,0,0,0.4);
+        }
+        
+        /* Risk indicators */
+        .risk-high {
+            background-color: rgba(255, 77, 77, 0.15);
+            border-left: 5px solid var(--high-risk) !important;
+        }
+        
+        .risk-medium {
+            background-color: rgba(255, 166, 77, 0.15);
+            border-left: 5px solid var(--medium-risk) !important;
+        }
+        
+        .risk-low {
+            background-color: rgba(255, 166, 77, 0.05);
+            border-left: 5px solid var(--low-risk) !important;
+        }
+        
+        /* Risk badge */
+        .risk-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin-top: 10px;
+            font-size: 0.9em;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .badge-high {
+            background-color: var(--high-risk);
+            color: white;
+        }
+        
+        .badge-medium {
+            background-color: var(--medium-risk);
+            color: black;
+        }
+        
+        .badge-low {
+            background-color: var(--low-risk);
+            color: black;
+        }
+        
+        .batch-link {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .batch-link a {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--tor-accent);
+            text-decoration: none;
+            padding: 10px 15px;
+            border: 1px solid var(--tor-accent);
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+        
+        .batch-link a:hover {
+            background-color: var(--tor-accent);
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--tor-darker);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s;
+        }
+        
+        .loading.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .loader {
+            width: 50px;
+            height: 50px;
+            border: 5px solid var(--tor-medium);
+            border-radius: 50%;
+            border-top-color: var(--tor-accent);
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            position: absolute;
+            bottom: 100px;
+            color: var(--tor-accent);
+            font-size: 14px;
+            letter-spacing: 1px;
+        }
+        
+        /* Add cybersecurity themed grid background */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(rgba(125, 70, 152, 0.1) 2px, transparent 2px),
+                radial-gradient(rgba(125, 70, 152, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px, 25px 25px;
+            background-position: 0 0, 25px 25px;
+            z-index: -1;
+            animation: gridShift 60s linear infinite;
+        }
+        
+        @keyframes gridShift {
+            0% { background-position: 0 0, 25px 25px; }
+            100% { background-position: 100px 100px, 125px 125px; }
+        }
+        
+        /* Add pulsing effect to cards */
+        .search-card::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--tor-accent), transparent);
+            animation: scanning 4s linear infinite;
+        }
+        
+        @keyframes scanning {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        /* Dynamic cybersecurity background with cursor effects */
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+
+        .cursor-follower {
+            position: fixed;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(153, 102, 204, 0.3) 0%, rgba(153, 102, 204, 0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            z-index: -1;
+            animation: pulse-cursor 2s infinite;
+            mix-blend-mode: screen;
+        }
+
+        .data-lines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            overflow: hidden;
+        }
+
+        .data-line {
+            position: absolute;
+            height: 1px;
+            width: 100%;
+            background-image: linear-gradient(to right, 
+                transparent, 
+                rgba(153, 102, 204, 0.1), 
+                rgba(153, 102, 204, 0.2), 
+                rgba(153, 102, 204, 0.1), 
+                transparent);
+            animation-name: data-line-animation;
+            animation-timing-function: linear;
+            animation-iteration-count: infinite;
+            box-shadow: 0 0 5px rgba(153, 102, 204, 0.5);
+        }
+
+        @keyframes data-line-animation {
+            0% { transform: translateY(-200%); }
+            100% { transform: translateY(200vh); }
+        }
+
+        .digital-rain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -3;
+            color: rgba(153, 102, 204, 0.1);
+            font-family: monospace;
+            font-size: 14px;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .digital-rain .rain-column {
+            position: absolute;
+            top: -20%;
+            animation-name: digital-rain-animation;
+            animation-timing-function: linear;
+            animation-iteration-count: infinite;
+            text-align: center;
+        }
+
+        @keyframes digital-rain-animation {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(200vh); }
+        }
+
+        @keyframes pulse-cursor {
+            0% { opacity: 0.2; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 0.4; transform: translate(-50%, -50%) scale(1.5); }
+            100% { opacity: 0.2; transform: translate(-50%, -50%) scale(1); }
+        }
+
+        body::before {
+            display: none; /* Remove original background */
+        }
+    </style>
+</head>
+<body>
+    <!-- Dynamic background elements -->
+    <div id="particles-js"></div>
+    <div class="cursor-follower"></div>
+    <div class="data-lines"></div>
+    <div class="digital-rain"></div>
+
+    <div class="loading">
+        <div class="loader"></div>
+        <div class="loading-text">Loading Dark Web Analyzer...</div>
+    </div>
+
+    <div class="navbar">
+        <div class="logo-nav"><i class="fas fa-globe-americas"></i> DARK WEB ANALYZER</div>
+        <div class="nav-links">
+            <a href="/" class="active"><i class="fas fa-home"></i> Home</a>
+            <a href="/dashboard"><i class="fas fa-chart-line"></i> Dashboard</a>
+            <a href="/history"><i class="fas fa-history"></i> History</a>
+            <a href="/batch"><i class="fas fa-tasks"></i> Batch</a>
+            <a href="/vulnerability"><i class="fas fa-shield-alt"></i> Vulnerability</a>
+        </div>
+        <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></button>
+    </div>
+    
+    <div class="container">
+        <div class="search-card">
+            <div class="logo">
+                <div class="logo-inner"><i class="fas fa-search"></i> DARK WEB ANALYZER</div>
+            </div>
+            
+            <form method="POST" id="analyzeForm">
+                <input type="text" name="onion_url" placeholder="Enter .onion URL (e.g., http://example.onion)" required>
+                <input type="submit" value="Analyze URL"><i class="fas fa-arrow-right"></i>
+            </form>
+
+            <div class="batch-link">
+                <a href="/batch"><i class="fas fa-layer-group"></i> Need to analyze multiple URLs? Use Batch Processing</a>
+            </div>
+
+            {% if tor_ip_address %}
+                <div class="ip-info">
+                    <i class="fas fa-globe"></i>
+                    <div>
+                        <p><strong>Apparent IP via Tor Session:</strong> {{ tor_ip_address }}</p>
+                        <p><small>If this IP is different from your actual public IP, it indicates the script is likely using Tor. If it shows an error or your actual IP, the script is not correctly routing through Tor for the IP check.</small></p>
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if error_message %}
+                <div class="error">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <div>
+                        <p><strong>Analysis Failed:</strong> {{ error_message }}</p>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        {% if data and data|length > 0 %}
+            <div class="results-card">
+                <h2 class="results-header"><i class="fas fa-file-alt"></i> Analysis Results</h2>
+                
+                {% for result in data %}
+                    {% if result.success %}
+                        {% if result.ai_analysis %}
+                            <div id="ai-assessment" class="{% if 'RISK_LEVEL: 7' in result.ai_analysis or 'RISK_LEVEL: 8' in result.ai_analysis or 'RISK_LEVEL: 9' in result.ai_analysis or 'RISK_LEVEL: 10' in result.ai_analysis %}risk-high{% elif 'RISK_LEVEL: 4' in result.ai_analysis or 'RISK_LEVEL: 5' in result.ai_analysis or 'RISK_LEVEL: 6' in result.ai_analysis %}risk-medium{% else %}risk-low{% endif %}">
+                                <div class="ai-analysis-header">
+                                    <i class="fas fa-robot"></i> AI Analysis for {{ result.url }}
+                                </div>
+                                <div class="ai-analysis">{{ result.ai_analysis }}</div>
+                                
+                                {% if 'RISK_LEVEL: 7' in result.ai_analysis or 'RISK_LEVEL: 8' in result.ai_analysis or 'RISK_LEVEL: 9' in result.ai_analysis or 'RISK_LEVEL: 10' in result.ai_analysis %}
+                                    <div class="risk-badge badge-high"><i class="fas fa-exclamation-triangle"></i> High Risk Content Detected</div>
+                                {% elif 'RISK_LEVEL: 4' in result.ai_analysis or 'RISK_LEVEL: 5' in result.ai_analysis or 'RISK_LEVEL: 6' in result.ai_analysis %}
+                                    <div class="risk-badge badge-medium"><i class="fas fa-exclamation"></i> Medium Risk Content Detected</div>
+                                {% else %}
+                                    <div class="risk-badge badge-low"><i class="fas fa-check-circle"></i> Low Risk Content</div>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                        
+                        <table>
+                            <tr>
+                                <th>Property</th>
+                                <th>Value</th>
+                            </tr>
+                            <tr>
+                                <td>URL</td>
+                                <td>{{ result.url }}</td>
+                            </tr>
+                            <tr>
+                                <td>Language</td>
+                                <td>{{ result.language }}</td>
+                            </tr>
+                            <tr>
+                                <td>Sentiment</td>
+                                <td>{{ result.sentiment }}</td>
+                            </tr>
+                            <tr>
+                                <td>Suspicious Keywords</td>
+                                <td>
+                                    {% if result.suspicious_keywords and result.suspicious_keywords|length > 0 %}
+                                        {% for keyword in result.suspicious_keywords %}
+                                            <span style="display: inline-block; background-color: rgba(255,77,77,0.2); padding: 3px 8px; margin: 2px; border-radius: 4px;">{{ keyword }}</span>
+                                        {% endfor %}
+                                    {% else %}
+                                        None detected
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Text Snippet</td>
+                                <td>{{ result.raw_text_snippet }}</td>
+                            </tr>
+                        </table>
+                    {% else %}
+                        <div class="error">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <div>
+                                <p><strong>Analysis Failed for {{ result.url }}:</strong> {{ result.error }}</p>
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% elif not error_message %}
+            <div class="no-data">
+                <i class="fas fa-info-circle"></i>
+                <p>Enter a .onion URL to analyze its content and evaluate potential risks.</p>
+            </div>
+        {% endif %}
+    </div>
+    
+    <script>
+        // Loading screen
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                const loader = document.querySelector('.loading');
+                loader.classList.add('fade-out');
+            }, 800);
+            
+            // Initialize dynamic background
+            initDynamicBackground();
+        });
+        
+        // Loading animation during form submission
+        document.getElementById('analyzeForm').addEventListener('submit', function() {
+            const loader = document.querySelector('.loading');
+            loader.classList.remove('fade-out');
+            document.querySelector('.loading-text').textContent = "Analyzing .onion site...";
+        });
+        
+        // Theme toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const htmlElement = document.documentElement;
+        
+        themeToggle.addEventListener('click', function() {
+            if (htmlElement.getAttribute('data-theme') === 'dark') {
+                htmlElement.setAttribute('data-theme', 'light');
+                themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+                localStorage.setItem('theme', 'light');
+            } else {
+                htmlElement.setAttribute('data-theme', 'dark');
+                themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+        
+        // Check for saved theme preference
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            htmlElement.setAttribute('data-theme', savedTheme);
+            themeToggle.innerHTML = savedTheme === 'dark' ? 
+                '<i class="fas fa-moon"></i>' : 
+                '<i class="fas fa-sun"></i>';
+        }
+        
+        // Initialize dynamic background effects
+        function initDynamicBackground() {
+            // Load particles.js if not already loaded
+            if (typeof particlesJS === 'undefined') {
+                const script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js';
+                script.onload = setupParticles;
+                document.head.appendChild(script);
+            } else {
+                setupParticles();
+            }
+            
+            // Initialize cursor follower
+            const cursorFollower = document.querySelector('.cursor-follower');
+            document.addEventListener('mousemove', (e) => {
+                cursorFollower.style.left = e.clientX + 'px';
+                cursorFollower.style.top = e.clientY + 'px';
+            });
+            
+            // Create data lines
+            const dataLines = document.querySelector('.data-lines');
+            for (let i = 0; i < 15; i++) {
+                const line = document.createElement('div');
+                line.classList.add('data-line');
+                line.style.top = Math.random() * 100 + 'vh';
+                line.style.animationDuration = (Math.random() * 8 + 5) + 's';
+                line.style.opacity = Math.random() * 0.5 + 0.1;
+                dataLines.appendChild(line);
+            }
+            
+            // Create digital rain
+            const digitalRain = document.querySelector('.digital-rain');
+            const characters = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
+            
+            for (let i = 0; i < 30; i++) {
+                const column = document.createElement('div');
+                column.classList.add('rain-column');
+                column.style.left = (Math.random() * 100) + 'vw';
+                column.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                column.style.opacity = Math.random() * 0.3 + 0.1;
+                
+                const columnLength = Math.floor(Math.random() * 20 + 10);
+                let columnHtml = '';
+                
+                for (let j = 0; j < columnLength; j++) {
+                    const charIndex = Math.floor(Math.random() * characters.length);
+                    columnHtml += characters.charAt(charIndex) + '<br>';
+                }
+                
+                column.innerHTML = columnHtml;
+                digitalRain.appendChild(column);
+            }
+        }
+        
+        function setupParticles() {
+            particlesJS('particles-js', {
+                "particles": {
+                    "number": {
+                        "value": 40,
+                        "density": {
+                            "enable": true,
+                            "value_area": 800
+                        }
+                    },
+                    "color": {
+                        "value": "#9966cc"
+                    },
+                    "shape": {
+                        "type": "circle",
+                        "stroke": {
+                            "width": 0,
+                            "color": "#000000"
+                        }
+                    },
+                    "opacity": {
+                        "value": 0.2,
+                        "random": true,
+                        "anim": {
+                            "enable": true,
+                            "speed": 1,
+                            "opacity_min": 0.1,
+                            "sync": false
+                        }
+                    },
+                    "size": {
+                        "value": 3,
+                        "random": true,
+                        "anim": {
+                            "enable": true,
+                            "speed": 2,
+                            "size_min": 0.1,
+                            "sync": false
+                        }
+                    },
+                    "line_linked": {
+                        "enable": true,
+                        "distance": 150,
+                        "color": "#7d4698",
+                        "opacity": 0.2,
+                        "width": 1
+                    },
+                    "move": {
+                        "enable": true,
+                        "speed": 1,
+                        "direction": "none",
+                        "random": true,
+                        "straight": false,
+                        "out_mode": "out",
+                        "bounce": false,
+                        "attract": {
+                            "enable": true,
+                            "rotateX": 600,
+                            "rotateY": 1200
+                        }
+                    }
+                },
+                "interactivity": {
+                    "detect_on": "canvas",
+                    "events": {
+                        "onhover": {
+                            "enable": true,
+                            "mode": "grab"
+                        },
+                        "onclick": {
+                            "enable": true,
+                            "mode": "push"
+                        },
+                        "resize": true
+                    },
+                    "modes": {
+                        "grab": {
+                            "distance": 140,
+                            "line_linked": {
+                                "opacity": 0.5
+                            }
+                        },
+                        "push": {
+                            "particles_nb": 3
+                        }
+                    }
+                },
+                "retina_detect": true
+            });
+        }
+    </script>
+</body>
+</html> 
